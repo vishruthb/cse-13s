@@ -1,30 +1,36 @@
 #!/bin/bash
 
-# Get the input arguments
-filename=$1
+# Get input arguments
+f=$1
 k=$2
 
-stopwords=($(cat stopwords | tr '\n' ' '))
+# Read stopwords file and store in array
+s=($(cat stopwords | tr '\n' ' '))
 
-words=($(cat $filename))
+# Read input file and store all read words in array
+a=($(cat $f))
 
-words=($(grep -o -w -i '[[:alpha:]]*' $filename))
+# Extract ONLY words from the input file to an array
+w=($(grep -o -w -i '[[:alpha:]]*' $f))
 
-words=($(echo "${words[@]}" | tr '[:upper:]' '[:lower:]'))
+# Convert all extracted words to lowercase
+w=($(echo "${w[@]}" | tr '[:upper:]' '[:lower:]'))
 
-for stopword in ${stopwords[@]}; do
-    words=($(echo "${words[@]}" | tr ' ' '\n' | grep -vw $stopword | tr '\n' ' '))
+# Remove stopwords
+for stopword in ${s[@]}; do
+    w=($(echo "${w[@]}" | tr ' ' '\n' | grep -vw $stopword | tr '\n' ' '))
 done
 
-declare -A freq
-for word in "${words[@]}"; do
-    freq[$word]=$((freq[$word]+1))
+# Create array to store word frequencies
+declare -A f
+for i in "${w[@]}"; do
+    f[$i]=$((f[$i]+1))
 done
 
-# Sort the words by frequency, then alphabetically if frequencies are equal
-sorted=($(for word in "${!freq[@]}"; do echo "$word ${freq[$word]}"; done | sort -k2,2nr -k1,1 | head -n "$k" | awk '{print $1}'))
+# Sort words by frequency and alphabetically
+sw=($(for i in "${!f[@]}"; do echo "$i ${f[$i]}"; done | sort -k2,2nr -k1,1 | head -n "$k" | awk '{print $1}'))
 
-# Print the top k most frequent words
-for word in "${sorted[@]}"; do
-    echo "$word"
+# Print to console
+for i in "${sw[@]}"; do
+    echo "$i"
 done
